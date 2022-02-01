@@ -5,11 +5,15 @@ import { Col, Container, Form, Row } from "react-bootstrap";
 
 function App() {
   // States
-  const [timeSigBeat, setTimeSigBeat] = useState(4);
-  const [timeSigNote, setTimeSigNote] = useState(4);
+  const [timeSigBeat, setTimeSigBeat] = useState("4");
+  const [timeSigNote, setTimeSigNote] = useState("4");
   const [preferredNote, setPreferredNote] = useState("quaver");
   const [tempo, setTempo] = useState(120);
   const [tempos] = useState([Date.now(), Date.now(), Date.now(), Date.now()]);
+  const [recording, setRecording] = useState(false);
+  const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(0);
+  let [notes] = useState([]);
 
   // tapTempo allows the user to modify the tempo by tapping the tempo out with mouse clicks instead.
   //
@@ -17,8 +21,6 @@ function App() {
   //  value is more than 4500ms we skip the tap tempo update as that would result in too low of a BPM. We then take that
   //  difference and convert it to seconds and use that to divide 3 as that is how many differences between beats we have.
   function tapTempo() {
-    console.log(timeSigBeat, timeSigNote, preferredNote);
-
     tempos.shift();
     tempos.push(Date.now());
 
@@ -33,6 +35,39 @@ function App() {
 
     console.log(`Updating tempo to ${t}`);
     setTempo(t);
+  }
+
+  function start() {
+    console.log("Starting recording");
+    notes = [];
+    setRecording(true);
+    setStartTime(Date.now());
+  }
+
+  function startRecording() {
+    const recordingTimeout = (timeSigNote / tempo) * 1000 * 60;
+    // TODO: Preroll of timeSigBeat before the recording starts
+    console.log(recordingTimeout);
+    setTimeout(() => start(), recordingTimeout);
+  }
+
+  function stopRecording() {
+    console.log("Stopping recording");
+    setRecording(false);
+    setEndTime(Date.now());
+  }
+
+  function recordNote() {
+    console.log("Recording notes");
+    notes.push(Date.now());
+  }
+
+  function listArray(array) {
+    if (array.length === 0) {
+      return <p>[]</p>;
+    }
+
+    return array.map((t) => <p>{t}&nbsp;</p>);
   }
 
   return (
@@ -92,6 +127,43 @@ function App() {
             <Form.Group className="mb-3" controlId="tapTempo">
               <Form.Label>Tempo</Form.Label>
               <Button onClick={() => tapTempo()}>{tempo}</Button>
+            </Form.Group>
+          </Form>
+        </Col>
+      </Row>
+
+      <Row>
+        {/* TODO: Implement the notes being displayed */}
+        <p>Picture containing the notes that has been recorded</p>
+
+        {/* TODO: Remove or create proper debug section */}
+        <p>Debug:</p>
+        <p>tempos: {listArray(tempos)}</p>
+        <p>recording: {recording.toString()}</p>
+        <p>startTime: {startTime}</p>
+        <p>endTime: {endTime}</p>
+        <p>notes: {listArray(notes)}</p>
+      </Row>
+
+      <Row>
+        <Col md={{ span: 4, offset: 4 }}>
+          <Form>
+            <Form.Group className="mb-3" controlId="timeSignature">
+              {recording ? (
+                <div>
+                  <Button onClick={() => stopRecording()}>
+                    Stop Recording
+                  </Button>
+                  <Button onClick={() => recordNote()}>Record Note</Button>
+                </div>
+              ) : (
+                <div>
+                  <Form.Label>Record Music</Form.Label>
+                  <Button onClick={() => startRecording()}>
+                    Start Recording
+                  </Button>
+                </div>
+              )}
             </Form.Group>
           </Form>
         </Col>
