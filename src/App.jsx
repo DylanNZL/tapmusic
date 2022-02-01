@@ -64,10 +64,10 @@ function App() {
 
   function listArray(array) {
     if (array.length === 0) {
-      return <p>[]</p>;
+      return `[]`;
     }
 
-    return array.map((t) => <p>{t}&nbsp;</p>);
+    return array.map((t) => `${t} `);
   }
 
   return (
